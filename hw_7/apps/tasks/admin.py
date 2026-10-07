@@ -11,7 +11,7 @@ class TaskAdmin(admin.ModelAdmin):
     list_display = ('id', 'title', 'status', 'deadline', 'created_at')
     list_filter = ('status', 'created_at')
     search_fields = ('title', 'description')
-    filter_horizontal = ('categories',)  # Удобный интерфейс для выбора Many-to-Many
+    filter_horizontal = ('categories',)  # Горизонтальный виджет для Many-to-Many связей
 
 @admin.register(SubTask)
 class SubTaskAdmin(admin.ModelAdmin):
