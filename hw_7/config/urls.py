@@ -20,4 +20,5 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('hello/', include('apps.hello.urls')), # Страница будет доступна по адресу /hello/
+    path('api/', include('apps.tasks.urls')),
 ]
