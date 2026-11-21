@@ -20,7 +20,7 @@ from .serializers import (
 # ЗАДАНИЕ 1: ModelViewSet для Категорий
 # ==========================================
 class CategoryViewSet(viewsets.ModelViewSet):
-    queryset = Category.objects.all()
+    queryset = Category.objects.all().order_by('-id')
     serializer_class = CategoryCreateSerializer
 
     # Кастомный метод для подсчета количества задач в конкретной категории
