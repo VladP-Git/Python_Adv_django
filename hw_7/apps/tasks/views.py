@@ -1,13 +1,14 @@
 from django.db.models import Count
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, generics, status
-from rest_framework.decorators import api_view
+from rest_framework import filters, generics, status, viewsets
+from rest_framework.decorators import action, api_view
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
-from .models import SubTask, Task
+from .models import Category, SubTask, Task
 from .serializers import (
+    CategoryCreateSerializer,
     SubTaskCreateSerializer,
     SubTaskSerializer,
     TaskCreateSerializer,
@@ -15,19 +16,37 @@ from .serializers import (
     TaskSerializer,
 )
 
+# ==========================================
+# ЗАДАНИЕ 1: ModelViewSet для Категорий
+# ==========================================
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategoryCreateSerializer
 
-# ==========================================
+    # Кастомный метод для подсчета количества задач в конкретной категории
+    # Доступен по адресу: GET /api/categories/{id}/count_tasks/
+    @action(detail=True, methods=['get'])
+    def count_tasks(self, request, pk=None):
+        category = self.get_object()
+        tasks_count = category.tasks.count()
+        return Response(
+            {
+                'id': category.id,
+                'category': category.name,
+                'tasks_count': tasks_count,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
 # ПАГИНАТОР ДЛЯ ПОДЗАДАЧ
-# ==========================================
 class SubTaskPagination(PageNumberPagination):
     page_size = 5
     page_size_query_param = 'page_size'
     max_page_size = 50
 
 
-# ==========================================
-# ЗАДАНИЕ 1: Generic Views для Задач (Tasks)
-# ==========================================
+# Generic Views для Задач (Tasks)
 class TaskListCreateView(generics.ListCreateAPIView):
     queryset = Task.objects.all()
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -51,9 +70,7 @@ class TaskRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
         return TaskDetailSerializer
 
 
-# ==========================================
-# ЗАДАНИЕ 2: Generic Views для Подзадач (SubTasks)
-# ==========================================
+# Generic Views для Подзадач (SubTasks)
 class SubTaskListCreateView(generics.ListCreateAPIView):
     queryset = SubTask.objects.all()
     pagination_class = SubTaskPagination
@@ -78,9 +95,7 @@ class SubTaskRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
         return SubTaskSerializer
 
 
-# ==========================================
-# Агрегирующий эндпоинт статистики задач (без изменений)
-# ==========================================
+# Агрегирующий эндпоинт статистики задач
 @api_view(['GET'])
 def get_tasks_statistics(request):
     total_tasks = Task.objects.count()

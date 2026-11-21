@@ -1,13 +1,31 @@
 from django.db import models
+from django.utils import timezone
+
+
+class CategoryManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+
 
 class Category(models.Model):
-    # Добавляем unique=True, так как в задании требуется уникальность по полю 'name'
     name = models.CharField(max_length=100, unique=True, verbose_name="Название категории")
+    is_deleted = models.BooleanField(default=False, verbose_name="Удалена")
+    deleted_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата удаления")
+
+    # Менеджер по умолчанию (возвращает только не удалённые записи)
+    objects = CategoryManager()
+    # Запасной менеджер для доступа ко всем записям в БД
+    all_objects = models.Manager()
 
     class Meta:
         db_table = 'task_manager_category'
         verbose_name = 'Category'
         verbose_name_plural = 'Categories'
+
+    def delete(self, using=None, keep_parents=False):
+        self.is_deleted = True
+        self.deleted_at = timezone.now()
+        self.save()
 
     def __str__(self):
         return self.name
