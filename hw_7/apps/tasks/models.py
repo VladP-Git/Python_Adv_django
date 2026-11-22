@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
@@ -48,6 +49,15 @@ class Task(models.Model):
     deadline = models.DateTimeField(verbose_name="Дедлайн")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
 
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='tasks',
+        null=True,
+        blank=True,
+        verbose_name="Владелец"
+    )
+
     class Meta:
         db_table = 'task_manager_task'
         ordering = ['-created_at']  # Сортировка по убыванию даты создания
@@ -74,6 +84,15 @@ class SubTask(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='New', verbose_name="Статус")
     deadline = models.DateTimeField(verbose_name="Дедлайн")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='subtasks',
+        null=True,
+        blank=True,
+        verbose_name="Владелец"
+    )
 
     class Meta:
         db_table = 'task_manager_subtask'

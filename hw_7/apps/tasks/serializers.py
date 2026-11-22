@@ -4,27 +4,32 @@ from .models import Category, Task, SubTask
 
 
 class TaskSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
+
     class Meta:
         model = Task
-        fields = ['id', 'title', 'description', 'status', 'deadline', 'created_at']
-        read_only_fields = ['id', 'created_at']
+        fields = ['id', 'title', 'description', 'status', 'deadline', 'created_at', 'owner']
+        read_only_fields = ['id', 'created_at', 'owner']
 
 
 # Базовый сериализатор для отображения подзадач (используется во вложенности и вьюхах)
 class SubTaskSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
+
     class Meta:
         model = SubTask
-        fields = ['id', 'title', 'description', 'task', 'status', 'deadline', 'created_at']
+        fields = ['id', 'title', 'description', 'task', 'status', 'deadline', 'created_at', 'owner']
+        read_only_fields = ['id', 'created_at', 'owner']
 
-
-# ЗАДАНИЕ 1: Переопределение полей сериализатора
 class SubTaskCreateSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
     # Явно переопределяем поле created_at как доступное только для чтения
     created_at = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = SubTask
-        fields = ['id', 'title', 'description', 'task', 'status', 'deadline', 'created_at']
+        fields = ['id', 'title', 'description', 'task', 'status', 'deadline', 'created_at', 'owner']
+        read_only_fields = ['id', 'created_at', 'owner']
 
     def validate_deadline(self, value):
         if value < timezone.now():
@@ -32,7 +37,6 @@ class SubTaskCreateSerializer(serializers.ModelSerializer):
         return value
 
 
-# ЗАДАНИЕ 2: Переопределение методов create и update
 class CategoryCreateSerializer(serializers.ModelSerializer):
     # Отключаем встроенный UniqueValidator DRF, чтобы проверка сработала внутри create/update
     name = serializers.CharField(max_length=100, validators=[])
@@ -57,8 +61,8 @@ class CategoryCreateSerializer(serializers.ModelSerializer):
         return instance
 
 
-# ЗАДАНИЕ 3: Использование вложенных сериализаторов
 class TaskDetailSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
     # Вкладываем SubTaskSerializer по имени обратной связи related_name='subtasks'
     subtasks = SubTaskSerializer(many=True, read_only=True)
     # Вкладываем сериализатор категорий
@@ -66,15 +70,17 @@ class TaskDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields = ['id', 'title', 'description', 'categories', 'status', 'deadline', 'created_at', 'subtasks']
+        fields = ['id', 'title', 'description', 'categories', 'status', 'deadline', 'created_at', 'subtasks', 'owner']
+        read_only_fields = ['id', 'created_at', 'owner']
 
-
-# ЗАДАНИЕ 4: Валидация данных в сериализаторах
+# Валидация данных в сериализаторах
 class TaskCreateSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
+
     class Meta:
         model = Task
-        fields = ['id', 'title', 'description', 'categories', 'status', 'deadline', 'created_at']
-        read_only_fields = ['id', 'created_at']
+        fields = ['id', 'title', 'description', 'categories', 'status', 'deadline', 'created_at', 'owner']
+        read_only_fields = ['id', 'created_at', 'owner']
 
     def validate_deadline(self, value):
         if value < timezone.now():

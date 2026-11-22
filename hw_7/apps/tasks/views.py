@@ -6,6 +6,7 @@ from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
+from .permissions import IsOwnerOrReadOnly
 from .models import Category, SubTask, Task
 from .serializers import (
     CategoryCreateSerializer,
@@ -50,6 +51,9 @@ class TaskListCreateView(generics.ListCreateAPIView):
     ordering_fields = ['created_at']
     ordering = ['-created_at']
 
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return TaskCreateSerializer
@@ -58,12 +62,20 @@ class TaskListCreateView(generics.ListCreateAPIView):
 
 class TaskRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Task.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
 
     def get_serializer_class(self):
         if self.request.method in ['PUT', 'PATCH']:
             return TaskCreateSerializer
         return TaskDetailSerializer
+
+class UserTasksListView(generics.ListAPIView):
+    """Получение списка задач, принадлежащих текущему авторизованному пользователю."""
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Task.objects.filter(owner=self.request.user)
 
 
 # ==========================================
@@ -78,6 +90,9 @@ class SubTaskListCreateView(generics.ListCreateAPIView):
     ordering_fields = ['created_at']
     ordering = ['-created_at']
 
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return SubTaskCreateSerializer
@@ -86,7 +101,7 @@ class SubTaskListCreateView(generics.ListCreateAPIView):
 
 class SubTaskRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = SubTask.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
 
     def get_serializer_class(self):
         if self.request.method in ['PUT', 'PATCH']:

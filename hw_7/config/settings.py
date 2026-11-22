@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'rest_framework_simplejwt.token_blacklist',
+    'drf_yasg',
     'apps.hello.apps.HelloConfig',
     'apps.tasks.apps.TasksConfig',
 ]
@@ -118,6 +119,16 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True, # при refresh генерить новый refresh
     'BLACKLIST_AFTER_ROTATION': True,
     'UPDATE_LAST_LOGIN': True,
+}
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    }
 }
 
 # Database

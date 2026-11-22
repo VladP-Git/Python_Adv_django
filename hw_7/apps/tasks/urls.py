@@ -8,6 +8,7 @@ router.register(r'categories', views.CategoryViewSet, basename='category')
 urlpatterns = [
     # Маршруты для задач (Generic Views)
     path('tasks/', views.TaskListCreateView.as_view(), name='task-list-create'),
+    path('tasks/my/', views.UserTasksListView.as_view(), name='user-tasks-list'),
     path('tasks/<int:pk>/', views.TaskRetrieveUpdateDestroyView.as_view(), name='task-detail-update-delete'),
     path('tasks/statistics/', views.get_tasks_statistics, name='task-statistics'),
 
