@@ -204,6 +204,8 @@ MAILERS = {
     },
 }
 
+DEFAULT_FROM_EMAIL = 'noreply@taskmanager.local'
+
 # Автоматически создаём папку logs в корне проекта, если её ещё нет
 LOGS_DIR = BASE_DIR / 'logs'
 os.makedirs(LOGS_DIR, exist_ok=True)
