@@ -6,6 +6,11 @@ router = DefaultRouter()
 router.register(r'categories', views.CategoryViewSet, basename='category')
 
 urlpatterns = [
+    # Аутентификация и регистрация (ДЗ 20)
+    path('auth/register/', views.RegisterView.as_view(), name='auth-register'),
+    path('auth/login/', views.LoginView.as_view(), name='auth-login'),
+    path('auth/refresh/', views.CookieTokenRefreshView.as_view(), name='auth-refresh'),
+    path('auth/logout/', views.LogoutView.as_view(), name='auth-logout'),
     # Маршруты для задач (Generic Views)
     path('tasks/', views.TaskListCreateView.as_view(), name='task-list-create'),
     path('tasks/my/', views.UserTasksListView.as_view(), name='user-tasks-list'),
